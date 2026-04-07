@@ -413,7 +413,7 @@ minecraft:lit_furnace
 minecraft:lit_pumpkin
 minecraft:log
 minecraft:log2
-minecraft:magma_cream
+minecraft:estilingue
 minecraft:map
 minecraft:melon
 minecraft:melon_block
