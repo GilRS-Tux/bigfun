@@ -24,7 +24,7 @@ func setTitle(title string) {
 }
 
 func animateTitle() {
-	text := "github.com/4everdies"
+	text := "github.com/GilRS-Tux"
 	for {
 		select {
 		case <-stopTitle:
@@ -60,13 +60,17 @@ func animate(message string) {
 		}
 	}
 }
+
 func main() {
 	go animateTitle()
+
 	home, _ := os.UserHomeDir()
 	mcPath := filepath.Join(home, "AppData", "Roaming", ".minecraft")
-	zipURL := "https://github.com/4everdies/bigfun/archive/refs/heads/main.zip"
+	zipURL := "https://github.com/GilRS-Tux/bigfun/archive/refs/heads/main.zip"
 	tempZip := "skuur.zip"
+
 	fmt.Printf("Path: %s\n", mcPath)
+
 	go animate("Downloading...")
 	err := downloadFile(tempZip, zipURL)
 	stopAnimation <- true
@@ -77,7 +81,9 @@ func main() {
 		return
 	}
 	fmt.Println("OK!")
+
 	defer os.Remove(tempZip)
+
 	go animate("Loading...")
 	foldersToExtract := []string{"mods/", "OneConfig/", "config/"}
 	err = unzipSpecific(tempZip, mcPath, foldersToExtract)
@@ -99,11 +105,13 @@ func downloadFile(filepath string, url string) error {
 		return err
 	}
 	defer resp.Body.Close()
+
 	out, err := os.Create(filepath)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
+
 	_, err = io.Copy(out, resp.Body)
 	return err
 }
@@ -114,12 +122,14 @@ func unzipSpecific(src, dest string, folders []string) error {
 		return err
 	}
 	defer r.Close()
+
 	for _, f := range r.File {
 		parts := strings.Split(f.Name, "/")
 		if len(parts) < 2 {
 			continue
 		}
 		subPath := strings.Join(parts[1:], "/")
+
 		shouldExtract := false
 		for _, folder := range folders {
 			if strings.HasPrefix(subPath, folder) {
@@ -127,6 +137,7 @@ func unzipSpecific(src, dest string, folders []string) error {
 				break
 			}
 		}
+
 		if shouldExtract && subPath != "" {
 			fpath := filepath.Join(dest, subPath)
 			if f.FileInfo().IsDir() {
