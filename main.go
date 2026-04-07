@@ -1,4 +1,5 @@
 package main
+
 import (
 	"archive/zip"
 	"fmt"
@@ -7,10 +8,43 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
+	"unsafe"
 )
 
+var stopTitle = make(chan bool)
 var stopAnimation = make(chan bool)
+
+func setTitle(title string) {
+	kernel32 := syscall.NewLazyDLL("kernel32.dll")
+	proc := kernel32.NewProc("SetConsoleTitleW")
+	titlePtr, _ := syscall.UTF16PtrFromString(title)
+	proc.Call(uintptr(unsafe.Pointer(titlePtr)))
+}
+
+func animateTitle() {
+	text := "github.com/4everdies"
+	for {
+		select {
+		case <-stopTitle:
+			setTitle(text)
+			return
+		default:
+			for i := 0; i <= len(text); i++ {
+				setTitle(text[:i] + "_")
+				time.Sleep(150 * time.Millisecond)
+			}
+			time.Sleep(1 * time.Second)
+			for i := len(text); i >= 0; i-- {
+				setTitle(text[:i] + "_")
+				time.Sleep(100 * time.Millisecond)
+			}
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+
 func animate(message string) {
 	chars := []string{"|", "/", "-", "\\"}
 	i := 0
@@ -27,6 +61,7 @@ func animate(message string) {
 	}
 }
 func main() {
+	go animateTitle()
 	home, _ := os.UserHomeDir()
 	mcPath := filepath.Join(home, "AppData", "Roaming", ".minecraft")
 	zipURL := "https://github.com/4everdies/bigfun/archive/refs/heads/main.zip"
@@ -54,7 +89,6 @@ func main() {
 		return
 	}
 	fmt.Println("OK!")
-
 	fmt.Println("\nInstalled! :/")
 	exit()
 }
